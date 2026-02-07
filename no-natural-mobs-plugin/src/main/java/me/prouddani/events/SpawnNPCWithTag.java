@@ -25,7 +25,7 @@ public record SpawnNPCWithTag(
         @Nullable TriConsumer<NPCEntity, Holder<EntityStore>, Store<EntityStore>> preAddToWorld,
         @Nullable TriConsumer<NPCEntity, Ref<EntityStore>, Store<EntityStore>> postSpawn
 ) implements IEvent<Void> {
-    private static void dispatch(
+    public static void dispatch(
             World world,
             String npcId,
             @Nonnull Vector3d position,

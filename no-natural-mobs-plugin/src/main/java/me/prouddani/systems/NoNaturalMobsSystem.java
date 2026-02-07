@@ -3,35 +3,29 @@ package me.prouddani.systems;
 import com.hypixel.hytale.component.*;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.RefSystem;
+import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import me.prouddani.components.NotNaturalTag;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class NoNaturalMobsSystem extends RefSystem<EntityStore> {
+public class NoNaturalMobsSystem extends EntityTickingSystem<EntityStore> {
     @Override
-    public void onEntityAdded(
-            @Nonnull Ref<EntityStore> ref,
-            @Nonnull AddReason addReason,
+    public void tick(
+            float dt,
+            int i,
+            @Nonnull ArchetypeChunk<EntityStore> archetypeChunk,
             @Nonnull Store<EntityStore> store,
             @Nonnull CommandBuffer<EntityStore> commandBuffer
     ) {
-        if (!ref.isValid())
-            return;
+        Ref<EntityStore> ref = archetypeChunk.getReferenceTo(i);
 
-        commandBuffer.removeEntity(ref, RemoveReason.REMOVE);
-    }
-
-    @Override
-    public void onEntityRemove(
-            @Nonnull Ref<EntityStore> ref,
-            @Nonnull RemoveReason removeReason,
-            @Nonnull Store<EntityStore> store,
-            @Nonnull CommandBuffer<EntityStore> commandBuffer
-    ) {
-
+        if (ref.isValid())
+            commandBuffer.tryRemoveEntity(ref, RemoveReason.REMOVE);
     }
 
     @Nullable
