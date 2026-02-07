@@ -1,0 +1,1 @@
+rootProject.name = "no-natural-mobs-plugin"
