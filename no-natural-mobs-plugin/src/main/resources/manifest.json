@@ -1,0 +1,14 @@
+{
+  "Name": "No natural mobs",
+  "Group": "Runetale",
+  "Version": "1.0.0",
+  "Main": "me.prouddani.NoNaturalMobsPlugin",
+  "Authors": [
+    {
+      "Name": "Caigh"
+    },
+    {
+      "Name": "Prouddani"
+    }
+  ]
+}
