@@ -1,6 +1,8 @@
 package me.prouddani.systems;
 
 import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.event.IEventDispatcher;
+import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.asset.type.model.config.Model;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -25,37 +27,27 @@ public class NonNaturalMobSpawner implements Consumer<SpawnNPCWithTag> {
 
         NoNaturalMobsPlugin.LOGGER.atInfo().log("sir yes sir!");
 
+        ModelAsset asset = ModelAsset.getAssetMap().getAsset(event.npcId());
+        if (asset == null) {
+            NoNaturalMobsPlugin.LOGGER.atInfo().log("model asset is invalid!");
+            return;
+        }
+
+        Model model = Model.createScaledModel(asset, 1.0f);
+
         var store = event.world().getEntityStore().getStore();
-        var pair = NPCPlugin.get().spawnNPC(store, event.npcId(), null, event.position(), event.rotation());
-        if (pair == null) {
-            NoNaturalMobsPlugin.LOGGER.atInfo().log("pair is null");
-            return;
-        }
+        var pair = NPCPlugin.get().spawnEntity(
+                store, roleIndex, event.position(), event.rotation(), model,
+                (npc, holder, store2) -> {
+                    holder.addComponent(NotNaturalTag.getComponentType(), new NotNaturalTag());
 
-        var ref = pair.key();
-        if (!ref.isValid()) {
-            NoNaturalMobsPlugin.LOGGER.atInfo().log("ref is invalid!");
-            return;
-        }
-
-        NoNaturalMobsPlugin.LOGGER.atInfo().log("adding component");
-        store.addComponent(ref, NotNaturalTag.getComponentType());
-//        ModelAsset asset = ModelAsset.getAssetMap().getAsset(event.npcId());
-//        Model model = Model.createScaledModel(asset, 1.0f);
-//        Pair<Ref<EntityStore>, NPCEntity> pair = NPCPlugin.get().spawnEntity(
-//                event.world().getEntityStore().getStore(),
-//                roleIndex,
-//                event.position(),
-//                event.rotation(),
-//                model,
-//                (npc, holder, store) -> {
-//                    // pre-add hook
-//                    holder.addComponent(NotNaturalTag.getComponentType(), new NotNaturalTag());
-//                    NoNaturalMobsPlugin.LOGGER.atInfo().log("added component");
-//                },
-//                (npc, ref, store) -> {
-//                    // post-add hook if needed
-//                }
-//        );
+                    if (event.preAddToWorld() != null)
+                        event.preAddToWorld().accept(npc, holder, store2);
+                },
+                (npc, ref, store2) -> {
+                    if (event.postSpawn() != null)
+                        event.postSpawn().accept(npc, ref, store2);
+                }
+        );
     }
 }
